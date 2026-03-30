@@ -16,25 +16,24 @@ jobs:
       postgres:
         image: postgres:15
         env:
-          POSTGRES_USER: testuser
-          POSTGRES_PASSWORD: testpass
-          POSTGRES_DB: testdb
+          POSTGRES_USER: django_user
+          POSTGRES_PASSWORD: django_pass
+          POSTGRES_DB: django_db
         ports:
           - 5432:5432
         options: >-
-          --health-cmd "pg_isready -U testuser -d testdb"
+          --health-cmd "pg_isready -U django_user -d django_db"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
 
     env:
-      # Настройки для подключения Django к Postgres
-      DATABASE_URL: postgres://testuser:testpass@127.0.0.1:5432/testdb
-      PGUSER: testuser
-      PGPASSWORD: testpass
+      # Подключение Django к PostgreSQL
       PGHOST: 127.0.0.1
+      PGUSER: django_user
+      PGPASSWORD: django_pass
+      PGDATABASE: django_db
       PGPORT: 5432
-      PGDATABASE: testdb
       CI: true
 
     steps:
@@ -51,6 +50,13 @@ jobs:
 
     - name: Install dependencies
       run: pip install -r stocks_products/requirements.txt
+
+    - name: Wait for Postgres to be ready
+      run: |
+        until pg_isready -h $PGHOST -U $PGUSER -d $PGDATABASE; do
+          echo "Waiting for Postgres..."
+          sleep 1
+        done
 
     - name: Run migrations
       run: python stocks_products/manage.py migrate
