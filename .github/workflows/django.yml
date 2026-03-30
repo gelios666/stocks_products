@@ -2,19 +2,46 @@ name: Django CI/CD
 
 on:
   push:
-    branches: [ master ]
+    branches:
+      - master
   pull_request:
-    branches: [ master ]
+    branches:
+      - master
 
 jobs:
   test:
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: testuser
+          POSTGRES_PASSWORD: testpass
+          POSTGRES_DB: testdb
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U testuser -d testdb"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      # Настройки для подключения Django к Postgres
+      DATABASE_URL: postgres://testuser:testpass@127.0.0.1:5432/testdb
+      PGUSER: testuser
+      PGPASSWORD: testpass
+      PGHOST: 127.0.0.1
+      PGPORT: 5432
+      PGDATABASE: testdb
+      CI: true
+
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
 
-    - name: Setup Python 3.11
+    - name: Setup Python
       uses: actions/setup-python@v4
       with:
         python-version: 3.11
@@ -26,9 +53,7 @@ jobs:
       run: pip install -r stocks_products/requirements.txt
 
     - name: Run migrations
-      run: |
-        python stocks_products/manage.py migrate
+      run: python stocks_products/manage.py migrate
 
     - name: Run tests
-      run: |
-        python stocks_products/manage.py test
+      run: python stocks_products/manage.py test --verbosity=2
