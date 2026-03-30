@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 
 from pathlib import Path
 
+import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -132,3 +133,15 @@ STATIC_URL = '/static/'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+if os.environ.get("CI") == "true":
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": os.environ.get("PGDATABASE", "django_db"),
+            "USER": os.environ.get("PGUSER", "django_user"),
+            "PASSWORD": os.environ.get("PGPASSWORD", "django_pass"),
+            "HOST": os.environ.get("PGHOST", "127.0.0.1"),
+            "PORT": os.environ.get("PGPORT", "5432"),
+        }
+    }
