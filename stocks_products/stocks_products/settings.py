@@ -25,8 +25,9 @@ SECRET_KEY = 'django-insecure-nw^y+m^wmxza1asgk+)!ua2qx9)g+#v=6%76-9i8i(6eqiw94j
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '127.0.0.1:8080']
 
+CSRF_TRUSTED_ORIGINS = ['http://127.0.0.1:8080']
 
 # Application definition
 
@@ -81,6 +82,8 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'netology_stocks_products',
+        'USER': 'django_user',
+        'PASSWORD': 'django_password',
         'HOST': '127.0.0.1',
         'PORT': '5432',
     }
